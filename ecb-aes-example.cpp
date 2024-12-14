@@ -3,7 +3,7 @@
 #include <random>
 #include <iomanip>
 
-#include "aes.hpp"
+#include "ecb-aes.hpp"
 
 //You don't need this, you can hard code a key or use your own key generator
 // Function to generate a random key and return it as std::array
