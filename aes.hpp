@@ -5,12 +5,10 @@
 #include <cstdint>
 
 // AES block and key sizes
-constexpr size_t BLOCK_SIZE = 16; // 128-bit block size
-constexpr size_t KEY_SIZE = 64;   // 512-bit key size
-constexpr size_t ROUNDS = 16;	 // Number of encryption rounds
+constexpr size_t BLOCK_SIZE = 16;		// 128-bit block size
+constexpr size_t AES_KEY_SIZE = 64;		// 512-bit key size
+constexpr size_t ROUNDS = 16;			// Number of encryption rounds
 
-using Block = std::array<uint8_t, BLOCK_SIZE>;
-using Key = std::array<uint8_t, KEY_SIZE>;
 
 // AES S-Box (standard AES substitution table)
 constexpr uint8_t S_BOX[ 256 ] = {
@@ -55,22 +53,22 @@ constexpr uint8_t INV_S_BOX[ 256 ] = {
 
 // Functions
 // Substitute bytes using the S-Box
-void SubBytes( Block& block ) {
+void SubBytes( std::array<uint8_t, BLOCK_SIZE>& block ) {
 	for ( auto& byte : block ) {
 		byte = S_BOX[ byte ];
 	}
 }
 
 // Inverse Substitute bytes using the Inverse S-Box
-void InvSubBytes( Block& block ) {
+void InvSubBytes( std::array<uint8_t, BLOCK_SIZE>& block ) {
 	for ( auto& byte : block ) {
 		byte = INV_S_BOX[ byte ];
 	}
 }
 
 // Shift rows (standard AES)
-void ShiftRows( Block& block ) {
-	Block temp = block;
+void ShiftRows( std::array<uint8_t, BLOCK_SIZE>& block ) {
+	std::array<uint8_t, BLOCK_SIZE> temp = block;
 	// Perform row shifts
 	block[ 1 ] = temp[ 5 ];
 	block[ 5 ] = temp[ 9 ];
@@ -89,8 +87,8 @@ void ShiftRows( Block& block ) {
 }
 
 // Inverse Shift rows (standard AES)
-void InvShiftRows( Block& block ) {
-	Block temp = block;
+void InvShiftRows( std::array<uint8_t, BLOCK_SIZE>& block ) {
+	std::array<uint8_t, BLOCK_SIZE> temp = block;
 	// Perform inverse row shifts
 	block[ 1 ] = temp[ 13 ];
 	block[ 5 ] = temp[ 1 ];
@@ -109,7 +107,7 @@ void InvShiftRows( Block& block ) {
 }
 
 // MixColumns (simplified for demonstration)
-void MixColumns( Block& block ) {
+void MixColumns( std::array<uint8_t, BLOCK_SIZE>& block ) {
 	for ( size_t i = 0; i < 4; ++i ) {
 		uint8_t a = block[ i * 4 ];
 		uint8_t b = block[ i * 4 + 1 ];
@@ -124,15 +122,15 @@ void MixColumns( Block& block ) {
 }
 
 // Add round key
-void AddRoundKey( Block& block, const Block& round_key ) {
+void AddRoundKey( std::array<uint8_t, BLOCK_SIZE>& block, const std::array<uint8_t, BLOCK_SIZE>& round_key ) {
 	for ( size_t i = 0; i < BLOCK_SIZE; ++i ) {
 		block[ i ] ^= round_key[ i ];
 	}
 }
 
 // Key expansion for 16 rounds
-std::vector<Block> KeyExpansion( const Key& key ) {
-	std::vector<Block> round_keys( ROUNDS );
+std::vector<std::array<uint8_t, BLOCK_SIZE>> KeyExpansion( const std::array<uint8_t, AES_KEY_SIZE>& key ) {
+	std::vector<std::array<uint8_t, BLOCK_SIZE>> round_keys( ROUNDS );
 
 	for ( size_t i = 0; i < ROUNDS; ++i ) {
 		// Derive each round key (simple XOR for demo purposes)
@@ -145,7 +143,7 @@ std::vector<Block> KeyExpansion( const Key& key ) {
 }
 
 // Encrypt a block
-void Encrypt( Block& block, const std::vector<Block>& round_keys ) {
+void Encrypt( std::array<uint8_t, BLOCK_SIZE>& block, const std::vector<std::array<uint8_t, BLOCK_SIZE>>& round_keys ) {
 	AddRoundKey( block, round_keys[ 0 ] );
 
 	for ( size_t round = 1; round < ROUNDS; ++round) {
@@ -161,7 +159,7 @@ void Encrypt( Block& block, const std::vector<Block>& round_keys ) {
 }
 
 // Decrypt a block
-void Decrypt( Block& block, const std::vector<Block>& round_keys ) {
+void Decrypt( std::array<uint8_t, BLOCK_SIZE>& block, const std::vector<std::array<uint8_t, BLOCK_SIZE>>& round_keys ) {
 	AddRoundKey( block, round_keys[ ROUNDS - 1 ] );
 
 	for ( size_t round = ROUNDS - 1; round > 0; --round ) {
