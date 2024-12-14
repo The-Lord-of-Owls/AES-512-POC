@@ -25,6 +25,8 @@ I do not have time to check across every CPU that exists. If AES-ni doesn't work
 
 All modes will eventually be supported for AES and AES-ni
 
+64 byte block size: Maybe later, not for AES-ni unfortunately
+
 ECB MODE: AES and AES-ni complete
 
 CBC MODE: Pending
